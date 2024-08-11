@@ -1,0 +1,13 @@
+bin/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+CMakeScripts/
+cmake_install.cmake
+Makefile
+
+# IDE
+.vscode/
+.idea/
+*.sln

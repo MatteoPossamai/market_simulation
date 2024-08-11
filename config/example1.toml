@@ -1,0 +1,6 @@
+[simulation]
+actors=10
+instruments=2
+sectors=1
+emitters=1
+markets=1
