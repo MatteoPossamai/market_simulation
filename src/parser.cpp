@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "constants.h"
 #include <iostream>
 #include <string>
 #include <map>
@@ -13,10 +14,10 @@ namespace parser
         return str.substr(first, last - first + 1);
     }
 
-    std::map<std::string, std::map<std::string, std::string>> parseTOML(const std::string filename)
+    constants::config_t parseTOML(const std::string filename)
     {
         std::ifstream file(filename);
-        std::map<std::string, std::map<std::string, std::string>> config;
+        constants::config_t config;
         std::string section, key, value, line;
 
         while (std::getline(file, line))

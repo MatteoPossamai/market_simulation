@@ -1,18 +1,25 @@
 #include "parser.h"
+#include "simulation.h"
 #include <string>
 
 int main()
 {
+    // Simulation settings
     const std::string filename = "./config/example1.toml";
     auto config_map = parser::parseTOML(filename);
+    const int SIMULATION_TICK_DURATION = 100;
 
-    for (auto it = config_map.cbegin(); it != config_map.cend(); ++it)
+    // Simulation creation
+    simulation::Simulation simulation;
+    simulation.init(config_map);
+
+    // Run the simulaiton
+    while (simulation.tick < SIMULATION_TICK_DURATION)
     {
-        std::cout << it->first << " ";
-        for (auto second = it->second.cbegin(); second != it->second.cend(); second++)
-        {
-            std::cout << second->first << " " << second->second << "\n";
-        }
+        simulation.display_current();
+        simulation.simulate_tick();
     }
+
+    simulation.stop();
     return 0;
 }

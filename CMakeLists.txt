@@ -8,9 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Headers + source files.
 include_directories(include)
-include_directories(include/parser)
 file(GLOB SOURCES "src/*.cpp")
-file(GLOB PARSER_SOURCES "src/parser/*.cpp")
 
 # Executable.
 add_executable(simulation ${SOURCES} ${PARSER_SOURCES} example/example1.cpp)
