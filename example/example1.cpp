@@ -7,7 +7,7 @@ int main()
     // Simulation settings
     const std::string filename = "./config/example1.toml";
     auto config_map = parser::parseTOML(filename);
-    const int SIMULATION_TICK_DURATION = 100;
+    const int SIMULATION_TICK_DURATION = 1;
 
     // Simulation creation
     simulation::Simulation simulation;

@@ -1,6 +1,7 @@
 [simulation]
 actors=10
 instruments=2
-sectors=1
+sectors=2
 emitters=1
 markets=1
+max_starting_cash=1000000

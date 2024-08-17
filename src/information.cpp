@@ -4,20 +4,20 @@
 
 namespace information
 {
-    News::News(float sentiment_value, Emitter &emitter, int time_value)
+    News::News(double sentiment_value, Emitter &emitter, int time_value)
         : sentiment(sentiment_value),
           emitter(emitter),
           time(time_value) {}
 
-    SectorNews::SectorNews(float sentiment_value, Emitter &emitter, int time_value, instruments::Sector sector_value)
+    SectorNews::SectorNews(double sentiment_value, Emitter &emitter, int time_value, instruments::Sector* sector_value)
         : News(sentiment_value, emitter, time_value),
           sector(sector_value) {}
 
-    CompanyNews::CompanyNews(float sentiment_value, Emitter &emitter, int time_value, instruments::Company company_value)
+    CompanyNews::CompanyNews(double sentiment_value, Emitter &emitter, int time_value, instruments::Company* company_value)
         : News(sentiment_value, emitter, time_value),
           company(company_value) {}
 
-    Emitter::Emitter(std::string name_value, float trustability_value, EmitterType type_value)
+    Emitter::Emitter(std::string name_value, double trustability_value, EmitterType type_value)
         : name(name_value),
           trustability(trustability_value),
           type(type_value) {}

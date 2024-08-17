@@ -13,27 +13,27 @@ namespace information
         long long int time;
 
     public:
-        float sentiment;
+         double sentiment;
         Emitter &emitter;
 
-        News(float, Emitter &emitter, int time);
+        News(double, Emitter &emitter, int time);
     };
 
     // Concrete news
     class SectorNews : public News
     {
     public:
-        instruments::Sector sector;
+        instruments::Sector* sector;
 
-        SectorNews(float, Emitter &, int, instruments::Sector);
+        SectorNews(double, Emitter &, int, instruments::Sector*);
     };
 
     class CompanyNews : public News
     {
     public:
-        instruments::Company company;
+        instruments::Company* company;
 
-        CompanyNews(float, Emitter &emitter, int time, instruments::Company);
+        CompanyNews(double, Emitter &emitter, int time, instruments::Company*);
     };
 
     // News stream
@@ -54,10 +54,10 @@ namespace information
     {
     public:
         std::string name;
-        float trustability;
+        double trustability;
         EmitterType type;
 
-        Emitter(std::string, float, EmitterType);
+        Emitter(std::string, double, EmitterType);
         void emit(NewsStream &stream);
     };
 

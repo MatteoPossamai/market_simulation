@@ -1,25 +1,35 @@
 #pragma once
-#include "instruments.h"
-#include <map>
-#include <string>
 
 namespace actors
 {
-    using portfolio_t = std::map<instruments::Instrument, int>;
+    class Actor;
+}
 
+#include <map>
+#include <string>
+#include <vector>
+#include "market.h"
+#include "instruments.h"
+
+namespace actors
+{
     // Base actors
+    using portfolio_t = std::map<instruments::Stock, int>;
+
     class Actor
     {
         int id;
-        std::string name;
-        float risk_adversity;
+        double risk_adversity;
         int age;
         int execution_pace;
-        int cash;
+        double cash;
+        std::vector<int> active_orders;
+        void buy(market::Market &, instruments::Stock &, market::OrderType, int, double price);
+        void sell(market::Market &, instruments::Stock &, market::OrderType, int, double price);
 
     public:
         portfolio_t portfolio;
-
-        Actor(int, std::string, float, int, int, int);
+        Actor(int, double, int, int, double);
     };
+
 }

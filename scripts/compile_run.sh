@@ -1,7 +1,7 @@
-cmake .
-make
-echo "-----------------"
-echo "Simulation begins"
-echo "-----------------"
-echo
+cmake . && make && 
+
+echo "-----------------" && 
+echo "Simulation begins" && 
+echo "-----------------" && 
+echo && 
 ./bin/simulation

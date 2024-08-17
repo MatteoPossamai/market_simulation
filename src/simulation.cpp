@@ -1,22 +1,111 @@
-#include "constants.h"
+#include "actors.h"
+#include "instruments.h"
 #include "simulation.h"
+#include "market.h"
 #include <iostream>
+#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
+#include <map>
 
 namespace simulation
 {
 
+    std::string log_string = "[LOG] ";
     void Simulation::init(constants::config_t config)
     {
+        std::vector<std::string> sector_names = {"Technology", "Industry", "Food&Beverage", "Travel", "Luxory", "Energy", "Healthcare", "Finance", "Education", "Insurance", "Agriculture"};
         this->config = config;
-
-        // TODO: initialize all internal private data structures
         this->tick = 0;
+        srand((unsigned)time(NULL));
+        double max_starting_cash = 10000000;
+        this->news_stream = information::NewsStream();
+
+        std::map<std::string, std::string> simulation_config = this->config.at("simulation");
+
+        if (simulation_config.count("max_starting_cash"))
+        {
+            max_starting_cash = std::stoi(simulation_config.at("max_starting_cash"));
+        }
+
+        // Create actors
+        int actor_number = std::stoi(simulation_config.at("actors"));
+        for (int i = 0; actor_number > i; i++)
+        {
+            this->actors.push_back(actors::Actor(i, rand() % 100, rand() % 100, rand() % 10, rand() % 100000000));
+        }
+
+        // Create sectors
+        int sector_number = std::stoi(simulation_config.at("sectors"));
+        for (int i = 0; sector_number > i; i++)
+        {
+            this->sectors.push_back(instruments::Sector(
+                sector_names.at(rand() % sector_names.size()) + std::to_string(i)));
+        }
+
+        // Create companies
+        for (int i = 0; std::stoi(simulation_config.at("instruments")) > i; i++)
+        {
+            long int stocks = rand() % 1000000;
+            long int owned = stocks - (rand() % 10000);
+            this->companies.push_back(
+                instruments::Company(
+                    i, stocks, owned, rand() % 1000000, this->sectors[rand() % this->sectors.size()]));
+        }
+
+        // Allocate instruments
+        for (int i = 0; std::stoi(simulation_config.at("instruments")) > i; i++)
+        {
+            long int stocks = rand() % 1000000;
+            long int owned = stocks - (rand() % 10000);
+            this->instruments.push_back(
+                &this->companies.at(i).stock);
+        }
+
+        // Create emitters
+        for (int i = 0; std::stoi(simulation_config.at("emitters")) > i; i++)
+        {
+            this->emitters.push_back(
+                information::Emitter(
+                    "Emitter" + std::to_string(i), ((double)rand() / (RAND_MAX)) + 1, information::EmitterType::OFFICIAL_EMITTER));
+        }
+
+        // Create markets
+        for (int i = 0; std::stoi(simulation_config.at("markets")) > i; i++)
+        {
+            this->markets.push_back(market::Market(
+                "Market" + std::to_string(i)));
+        }
     }
 
     void Simulation::display_current()
     {
-        // TODO: full display (how) of the current state of simulation
-        std::cout << "Time" << this->tick << std::endl;
+        std::cout << log_string << "Time: " << this->tick << std::endl;
+        std::cout << log_string << "Markets Situation" << std::endl
+                  << "----------------------------------" << std::endl;
+
+        for (market::Market market : this->markets)
+        {
+            std::cout << market.name << std::endl;
+            for (instruments::Stock *instrument : this->instruments)
+            {
+                (*instrument).show();
+                if (market.buy_orders.count(instrument))
+                {
+                    std::cout << "\tTop buy order: " << std::endl
+                              << "\t================" << std::endl;
+                    std::cout << "\t\tPrice:" << market.buy_orders.at(instrument).top()->quantity << std::endl;
+                }
+                std::cout << std::endl;
+                if (market.sell_orders.count(instrument))
+                {
+                    std::cout << "\tTop sell order: " << std::endl
+                              << "\t================" << std::endl;
+                    std::cout << "\t\tPrice:" << market.sell_orders.at(instrument).top()->quantity << std::endl;
+                }
+            }
+        }
+        std::cout << "----------------------------------" << std::endl;
     }
 
     void Simulation::simulate_tick()

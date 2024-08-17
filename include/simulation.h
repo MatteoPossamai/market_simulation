@@ -14,10 +14,12 @@ namespace simulation {
         private:
             constants::config_t config;
             information::NewsStream news_stream;
-            std::set<instruments::Sector> sectors;
+            std::vector<instruments::Sector> sectors;
             std::vector<information::Emitter> emitters;
             std::vector<market::Market> markets;
             std::vector<actors::Actor> actors;
+            std::vector<instruments::Stock*> instruments;
+            std::vector<instruments::Company> companies;
 
         public:
             int tick;
