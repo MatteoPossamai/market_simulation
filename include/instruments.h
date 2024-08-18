@@ -16,7 +16,7 @@ namespace instruments
     class Instrument
     {
     public:
-        virtual void show(int indent = 0) = 0;
+        virtual void show(std::string) = 0;
         virtual ~Instrument() = default;
     };
 
@@ -44,11 +44,12 @@ namespace instruments
     {
     private:
     public:
+        std::shared_ptr<Stock> self;
         std::string ticker;
         const Company &company;
         Stock(std::string, const Company &);
         double get_current_price(const market::Market &);
-        void show(int indent = 0);
+        void show(std::string);
         bool operator=(const Stock &other) const
         {
             return this->ticker == other.ticker;

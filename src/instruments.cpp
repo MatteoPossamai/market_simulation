@@ -9,18 +9,37 @@
 namespace instruments
 {
     Stock::Stock(std::string ticker_name, const Company &company)
-        : ticker(ticker_name), company(company) {}
+        : ticker(ticker_name), company(company)
+    {
+        std::shared_ptr<Stock> stock = std::make_shared<Stock>(*this);
+        this->self = stock;
+    }
 
     double Stock::get_current_price(const market::Market &market)
     {
-        double top_sell_price = market.sell_orders.at(this).top().get()->price;
-        double top_buy_price = market.buy_orders.at(this).top().get()->price;
-        return (top_buy_price + top_sell_price) / 2; // TODO: understand if good metric or should put the price at which it sells
+        if (market.sell_orders.at(self).size() == 0 && market.buy_orders.at(self).size() == 0)
+        {
+            return 100; // TODO: understand how to decide initial value
+        }
+        else if (market.sell_orders.at(self).size() == 0)
+        {
+            return market.buy_orders.at(self).top().get()->price;
+        }
+        else if (market.buy_orders.at(self).size() == 0)
+        {
+            return market.sell_orders.at(self).top().get()->price;
+        }
+        else
+        {
+            double top_sell_price = market.sell_orders.at(self).top().get()->price;
+            double top_buy_price = market.buy_orders.at(self).top().get()->price;
+            return (top_buy_price + top_sell_price) / 2; // TODO: understand if good metric or should put the price at which it sells
+        }
     }
 
-    void Stock::show(int indent)
+    void Stock::show(std::string initial_string)
     {
-        std::cout << std::string(indent, '\t') << "Ticker: " << this->ticker << std::endl;
+        std::cout << initial_string << "Ticker: " << this->ticker << std::endl;
     }
 
     Company::Company(int id_value, long int n_stock_value, long int n_owned_stock_value, long int debt, Sector &sector_value)

@@ -28,9 +28,11 @@ namespace information
         int publish = rand() % frequency;
 
         if (publish == 1){
+          std::cout << "[Emitter" << this->name << "]: " << "Company news of" << company->id << std::endl;
           CompanyNews company_news = CompanyNews((double) rand()/RAND_MAX, *this, time, company);
           stream.add_news(company_news, time);
         }else if (publish == 2){
+          std::cout << "[Emitter" << this->name << "]: " << "Sector news of" << sector->name << std::endl;
           SectorNews sector_news = SectorNews((double) rand()/RAND_MAX, *this, time, sector);
           stream.add_news(sector_news, time);
         }

@@ -11,7 +11,7 @@ include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
 
 # Executable.
-add_executable(simulation ${SOURCES} ${PARSER_SOURCES} example/example1.cpp)
+add_executable(simulation_exec ${SOURCES} ${PARSER_SOURCES} example/example1.cpp)
 
 # Output path.
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

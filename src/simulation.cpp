@@ -21,7 +21,17 @@ namespace simulation
         double max_starting_cash = 10000000;
         this->news_stream = information::NewsStream();
 
-        std::map<std::string, std::string> simulation_config = this->config.at("simulation");
+        std::map<std::string, std::string> simulation_config;
+        
+        if (this->config.size() == 0){
+            simulation_config["actors"] = "10";
+            simulation_config["instruments"] = "2";
+            simulation_config["sectors"] = "2";
+            simulation_config["emitters"] = "1";
+            simulation_config["max_starting_cash"] = "1000000";
+        }else {
+            simulation_config = this->config.at("simulation");
+        }
 
         if (simulation_config.count("max_starting_cash"))
         {
@@ -55,15 +65,29 @@ namespace simulation
                     i, stocks, owned, rand() % 1000000, this->sectors[rand() % this->sectors.size()]));
         }
 
-        // Allocate instruments
+        // Create market
+        this->market = market::Market("Stock market");
+        // Allocate instruments also in the market
         for (int i = 0; std::stoi(simulation_config.at("instruments")) > i; i++)
         {
             long int stocks = rand() % 1000000;
             long int owned = stocks - (rand() % 10000);
-            this->instruments.push_back(
-                &this->companies.at(i).stock);
+            std::shared_ptr<instruments::Stock> instrument = this->companies[i].stock.self;
+            
+            this->instruments.push_back(instrument);
+            this->market.buy_orders[instrument] = {};
+            this->market.sell_orders[instrument] = {};
+            
+
+            // Random stock distribution 
+            int free_stocks = this->companies[i].n_stocks - this->companies[i].n_owned_stocks;
+            while (free_stocks > 0){
+                actors::Actor lucky_actor = this->actors[rand() % this->actors.size()];
+                int val = std::min(rand(), free_stocks);
+                lucky_actor.portfolio[instrument] = val;
+                free_stocks -= val;
+            }
         }
-        // TODO: random stock distribution to initialize
 
         // Create emitters
         for (int i = 0; std::stoi(simulation_config.at("emitters")) > i; i++)
@@ -73,9 +97,6 @@ namespace simulation
                     "Emitter" + std::to_string(i), ((double)rand() / (RAND_MAX)) + 1, information::EmitterType::OFFICIAL_EMITTER));
         }
 
-        // Create markets
-        // TODO: register all the stoks in the market's lists
-        this->market = market::Market("Stock market");
     }
 
     void Simulation::display_current()
@@ -84,21 +105,32 @@ namespace simulation
 
 
             std::cout << market.name << std::endl;
-            for (instruments::Stock *instrument : this->instruments)
+            for (std::shared_ptr<instruments::Stock> instrument : this->instruments)
             {
-                (*instrument).show();
+                instrument->show(log_string);
                 if (market.buy_orders.count(instrument))
                 {
                     std::cout << log_string << "\tTop buy order: " << std::endl
                               << log_string << "\t================" << std::endl;
-                    std::cout << log_string << "\t\tPrice:" << market.buy_orders.at(instrument).top()->quantity << std::endl;
+                    std::cout << log_string << "\t\tPrice:";
+                    if (market.buy_orders.at(instrument).size() > 0) {
+                     std::cout << market.buy_orders.at(instrument).top()->quantity << std::endl;
+                    }else {
+                        std::cout << "Empty" << std::endl;
+                    }
+
                 }
                 std::cout << std::endl;
                 if (market.sell_orders.count(instrument))
                 {
                     std::cout << log_string << "\tTop sell order: " << std::endl
                               << log_string <<"\t================" << std::endl;
-                    std::cout << log_string << "\t\tPrice:" << market.sell_orders.at(instrument).top()->quantity << std::endl;
+                    std::cout << log_string << "\t\tPrice:";
+                    if (market.sell_orders.at(instrument).size() > 0) {
+                     std::cout << market.sell_orders.at(instrument).top()->quantity << std::endl;
+                    }else {
+                        std::cout << "Empty" << std::endl;
+                    }
                 }
             }
         std::cout << "----------------------------------" << std::endl;

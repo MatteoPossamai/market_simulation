@@ -16,7 +16,7 @@ namespace actors
 namespace actors
 {
     // Base actors
-    using portfolio_t = std::map<instruments::Stock *, int>;
+    using portfolio_t = std::map<std::shared_ptr<instruments::Stock>, int>;
 
     class Actor
     {
@@ -24,8 +24,8 @@ namespace actors
         double risk_adversity;
         int execution_pace;
         std::vector<int> active_orders;
-        void buy(market::Market &, instruments::Stock &, market::OrderType, int, double price);
-        void sell(market::Market &, instruments::Stock &, market::OrderType, int, double price);
+        void buy(market::Market &, std::shared_ptr<instruments::Stock>, market::OrderType, int, double price);
+        void sell(market::Market &, std::shared_ptr<instruments::Stock>, market::OrderType, int, double price);
         double inspect(const instruments::Company &, const information::NewsStream &);
         double cash;
         double inspect(const instruments::Sector &, const information::NewsStream &);

@@ -28,13 +28,13 @@ namespace market
         int id;
         actors::Actor &issuer;
         OrderType type;
-        instruments::Stock &instrument;
+        std::shared_ptr<instruments::Stock>instrument;
         int quantity;
         int time;
         double price;
         bool active;
 
-        Order(int, actors::Actor &, OrderType, instruments::Stock &, int, int);
+        Order(int, actors::Actor &, OrderType, std::shared_ptr<instruments::Stock>, int, int);
         bool operator=(const Order &other) const
         {
             return this->price == other.price;
@@ -57,13 +57,13 @@ namespace market
 
     public:
         std::string name;
-        std::map<instruments::Stock *, std::priority_queue<std::shared_ptr<Order>>> buy_orders;
-        std::map<instruments::Stock *, std::priority_queue<std::shared_ptr<Order>, std::vector<std::shared_ptr<Order>>, std::greater<std::shared_ptr<Order>>>> sell_orders;
+        std::map<std::shared_ptr<instruments::Stock>, std::priority_queue<std::shared_ptr<Order>>> buy_orders;
+        std::map<std::shared_ptr<instruments::Stock>, std::priority_queue<std::shared_ptr<Order>, std::vector<std::shared_ptr<Order>>, std::greater<std::shared_ptr<Order>>>> sell_orders;
 
         Market() = default;
         Market(std::string);
-        int add_buy_order(actors::Actor &, OrderType, instruments::Stock &, int, int);
-        int add_sell_order(actors::Actor &, OrderType, instruments::Stock &, int, int);
+        int add_buy_order(actors::Actor &, OrderType, std::shared_ptr<instruments::Stock>, int, int);
+        int add_sell_order(actors::Actor &, OrderType, std::shared_ptr<instruments::Stock>, int, int);
         std::shared_ptr<Order> get_order(int);
     };
 }

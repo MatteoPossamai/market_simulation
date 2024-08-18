@@ -18,7 +18,7 @@ namespace simulation {
             std::vector<information::Emitter> emitters;
             market::Market market;
             std::vector<actors::Actor> actors;
-            std::vector<instruments::Stock*> instruments;
+            std::vector<std::shared_ptr<instruments::Stock>> instruments;
             std::vector<instruments::Company> companies;
 
         public:

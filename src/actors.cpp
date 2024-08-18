@@ -11,8 +11,9 @@ namespace actors
         execution_pace(execution_pace_value),
         cash(cash_value) {}
 
-  void Actor::buy(market::Market &interest_market, instruments::Stock &instrument, market::OrderType order_type, int quantity, double price = 0)
+  void Actor::buy(market::Market &interest_market, std::shared_ptr<instruments::Stock> instrument, market::OrderType order_type, int quantity, double price = 0)
   {
+    std::cout << "[Actor:" << this->id << "]" << "BUYING " << instrument.get()->ticker << " FOR " << price << std::endl;
     if (order_type == market::LIMIT_ORDER && price <= 0)
     {
       throw std::invalid_argument("LIMIT_ORDER requires a valid price greater than 0.");
@@ -25,14 +26,15 @@ namespace actors
     {
       while (quantity > 0)
       {
-        auto best_sell = interest_market.sell_orders.at(&instrument).top().get();
+        auto best_sell = interest_market.sell_orders.at(instrument).top().get();
         interest_market.add_buy_order(*this, order_type, instrument, std::min(best_sell->quantity, quantity), best_sell->price);
       }
     }
   }
 
-  void Actor::sell(market::Market &interest_market, instruments::Stock &instrument, market::OrderType order_type, int quantity, double price = 0)
+  void Actor::sell(market::Market &interest_market, std::shared_ptr<instruments::Stock> instrument, market::OrderType order_type, int quantity, double price = 0)
   {
+    std::cout << "[Actor:" << this->id << "]" << "Selling" << std::endl;
     if (order_type == market::LIMIT_ORDER && price <= 0)
     {
       throw std::invalid_argument("LIMIT_ORDER requires a valid price greater than 0.");
@@ -45,7 +47,7 @@ namespace actors
     {
       while (quantity > 0)
       {
-        auto best_buy = interest_market.sell_orders.at(&instrument).top().get();
+        auto best_buy = interest_market.sell_orders.at(instrument).top().get();
         interest_market.add_sell_order(*this, order_type, instrument, std::min(best_buy->quantity, quantity), best_buy->price);
         quantity -= best_buy->quantity;
       }
@@ -68,26 +70,26 @@ namespace actors
       double price = stock->get_current_price(market);
       if (value < 15)
       {
-        sell(market, *stock, market::MARKET_ORDER, portfolio_iter->second);
+        sell(market, stock, market::MARKET_ORDER, portfolio_iter->second);
       }
       else if (value < 40)
       {
         if (rand() % 2)
         {
-          sell(market, *stock, market::LIMIT_ORDER, portfolio_iter->second / 2, price + (price * value / 1000));
+          sell(market, stock, market::LIMIT_ORDER, portfolio_iter->second / 2, price + (price * value / 1000));
         }
         else
         {
           double available = this->cash / this->risk_adversity;
           int quantity = std::max(0, (int)(price / available) - 5);
-          buy(market, *stock, market::LIMIT_ORDER, quantity, price - (price * value / 1000));
+          buy(market, stock, market::LIMIT_ORDER, quantity, price - (price * value / 1000));
         }
       }
       else if (value > 65)
       {
         double available = this->cash / this->risk_adversity;
         int quantity = price / available;
-        sell(market, *stock, market::MARKET_ORDER, quantity);
+        sell(market, stock, market::MARKET_ORDER, quantity);
       }
     }
 
@@ -101,13 +103,14 @@ namespace actors
       double available = this->cash / this->risk_adversity;
       int quantity = std::max(0, (int)available / current_price);
       double value = this->risk_adversity * sentiment;
+
       if (value > 40 && value < 70 && quantity != 0)
       {
-        buy(market, random_company.stock, market::LIMIT_ORDER, quantity, current_price - (current_price * value / 1000));
+        buy(market, random_company.stock.self, market::LIMIT_ORDER, quantity, current_price - (current_price * value / 1000));
       }
       else if (value > 70 && quantity != 0)
       {
-        buy(market, random_company.stock, market::MARKET_ORDER, quantity);
+        buy(market, random_company.stock.self, market::MARKET_ORDER, quantity, 0);
       }
     }
   }

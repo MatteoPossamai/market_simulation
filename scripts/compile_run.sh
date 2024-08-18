@@ -4,4 +4,4 @@ echo "-----------------" &&
 echo "Simulation begins" && 
 echo "-----------------" && 
 echo && 
-./bin/simulation
+./bin/simulation_exec

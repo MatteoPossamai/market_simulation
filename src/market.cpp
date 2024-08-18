@@ -6,7 +6,7 @@
 
 namespace market
 {
-  Order::Order(int id_val, actors::Actor &actor, OrderType order_type, instruments::Stock &instrument, int quantity_value, int price_val)
+  Order::Order(int id_val, actors::Actor &actor, OrderType order_type, std::shared_ptr<instruments::Stock>instrument, int quantity_value, int price_val)
       : issuer(actor),
         type(order_type),
         instrument(instrument),
@@ -24,19 +24,19 @@ namespace market
   Market::Market(std::string name_value)
       : name(name_value), counter(0) {}
 
-  int Market::add_buy_order(actors::Actor &actor, OrderType type, instruments::Stock &instrument, int quantity, int price)
+  int Market::add_buy_order(actors::Actor &actor, OrderType type, std::shared_ptr<instruments::Stock> instrument, int quantity, int price)
   {
     if (type == OrderType::MARKET_ORDER)
     {
-      while (quantity > 0 && this->sell_orders.at(&instrument).size() > 0 && actor.get_cash() > 0)
+      while (quantity > 0 && this->sell_orders.at(instrument).size() > 0 && actor.get_cash() > 0)
       {
-        std::shared_ptr<market::Order> top_sell = this->sell_orders.at(&instrument).top();
-        this->sell_orders.at(&instrument).pop();
+        std::shared_ptr<market::Order> top_sell = this->sell_orders.at(instrument).top();
+        this->sell_orders.at(instrument).pop();
 
-        while (sell_orders.at(&instrument).size() > 0 && !top_sell.get()->active)
+        while (sell_orders.at(instrument).size() > 0 && !top_sell.get()->active)
         {
-          top_sell = this->sell_orders.at(&instrument).top();
-          this->sell_orders.at(&instrument).pop();
+          top_sell = this->sell_orders.at(instrument).top();
+          this->sell_orders.at(instrument).pop();
         }
 
         int b_quantity = std::min(quantity, top_sell.get()->quantity);
@@ -48,20 +48,20 @@ namespace market
         }
 
         actors::Actor &counter_party = top_sell.get()->issuer;
-        if (counter_party.portfolio.count(&instrument) && counter_party.portfolio.at(&instrument) < b_quantity)
+        if (counter_party.portfolio.count(instrument) && counter_party.portfolio.at(instrument) < b_quantity)
         {
-          b_quantity = counter_party.portfolio.at(&instrument);
+          b_quantity = counter_party.portfolio.at(instrument);
         }
 
         // Exchange of cash and stocks after validity checks
-        counter_party.portfolio.at(&instrument) -= b_quantity;
+        counter_party.portfolio.at(instrument) -= b_quantity;
         counter_party.set_cash(counter_party.get_cash() + paid_price);
         actor.set_cash(actor.get_cash() - paid_price);
-        if (!actor.portfolio.at(&instrument))
+        if (!actor.portfolio.at(instrument))
         {
-          actor.portfolio.at(&instrument) = 0;
+          actor.portfolio.at(instrument) = 0;
         }
-        actor.portfolio.at(&instrument) = actor.portfolio.at(&instrument) + b_quantity;
+        actor.portfolio.at(instrument) = actor.portfolio.at(instrument) + b_quantity;
 
         quantity -= b_quantity;
       }
@@ -70,30 +70,30 @@ namespace market
     else
     {
       auto order = std::make_shared<Order>(++this->counter, actor, type, instrument, quantity, price);
-      if (!this->buy_orders.count(&instrument))
+      if (!this->buy_orders.count(instrument))
       {
-        this->buy_orders.insert({&instrument, {}});
+        this->buy_orders.insert({instrument, {}});
       }
-      buy_orders[&instrument].push(order);
+      buy_orders[instrument].push(order);
       orders[counter] = order;
       // TODO: fill the order if possible right away
       return this->counter;
     }
   }
 
-  int Market::add_sell_order(actors::Actor &actor, OrderType type, instruments::Stock &instrument, int quantity, int price)
+  int Market::add_sell_order(actors::Actor &actor, OrderType type, std::shared_ptr<instruments::Stock>instrument, int quantity, int price)
   {
     if (type == OrderType::MARKET_ORDER)
     {
-      while (quantity > 0 && this->buy_orders.at(&instrument).size() > 0)
+      while (quantity > 0 && this->buy_orders.at(instrument).size() > 0)
       {
-        std::shared_ptr<market::Order> top_buy = this->buy_orders.at(&instrument).top();
-        this->buy_orders.at(&instrument).pop();
+        std::shared_ptr<market::Order> top_buy = this->buy_orders.at(instrument).top();
+        this->buy_orders.at(instrument).pop();
 
-        while (buy_orders.at(&instrument).size() > 0 && !top_buy.get()->active)
+        while (buy_orders.at(instrument).size() > 0 && !top_buy.get()->active)
         {
-          top_buy = this->buy_orders.at(&instrument).top();
-          this->buy_orders.at(&instrument).pop();
+          top_buy = this->buy_orders.at(instrument).top();
+          this->buy_orders.at(instrument).pop();
         }
 
         int b_quantity = std::min(quantity, top_buy.get()->quantity);
@@ -106,10 +106,10 @@ namespace market
         }
 
         // Exchange of cash and stocks after validity checks
-        counter_party.portfolio.at(&instrument) += b_quantity;
+        counter_party.portfolio.at(instrument) += b_quantity;
         counter_party.set_cash(counter_party.get_cash() - paid_price);
         actor.set_cash(actor.get_cash() + paid_price);
-        actor.portfolio.at(&instrument) = actor.portfolio.at(&instrument) - b_quantity;
+        actor.portfolio.at(instrument) = actor.portfolio.at(instrument) - b_quantity;
 
         quantity -= b_quantity;
       }
@@ -118,11 +118,11 @@ namespace market
     else
     {
       auto order = std::make_shared<Order>(++this->counter, actor, type, instrument, quantity, price);
-      if (!this->sell_orders.count(&instrument))
+      if (!this->sell_orders.count(instrument))
       {
-        this->sell_orders.insert({&instrument, {}});
+        this->sell_orders.insert({instrument, {}});
       }
-      buy_orders[&instrument].push(order);
+      buy_orders[instrument].push(order);
       orders[counter] = order;
       // TODO: fill the order if possible right away
       return counter;
