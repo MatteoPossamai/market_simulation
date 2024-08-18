@@ -32,8 +32,10 @@ namespace simulation
         int actor_number = std::stoi(simulation_config.at("actors"));
         for (int i = 0; actor_number > i; i++)
         {
-            this->actors.push_back(actors::Actor(i, rand() % 100, rand() % 100, rand() % 10, rand() % 100000000));
+            this->actors.push_back(actors::Actor(i, rand() % 100, rand() % 10, rand() % 100000000));
         }
+        // Sort so that the fastest exection happens first
+        std::sort(this->actors.begin(), this->actors.end());
 
         // Create sectors
         int sector_number = std::stoi(simulation_config.at("sectors"));
@@ -61,6 +63,7 @@ namespace simulation
             this->instruments.push_back(
                 &this->companies.at(i).stock);
         }
+        // TODO: random stock distribution to initialize
 
         // Create emitters
         for (int i = 0; std::stoi(simulation_config.at("emitters")) > i; i++)
@@ -71,46 +74,47 @@ namespace simulation
         }
 
         // Create markets
-        for (int i = 0; std::stoi(simulation_config.at("markets")) > i; i++)
-        {
-            this->markets.push_back(market::Market(
-                "Market" + std::to_string(i)));
-        }
+        // TODO: register all the stoks in the market's lists
+        this->market = market::Market("Stock market");
     }
 
     void Simulation::display_current()
     {
-        std::cout << log_string << "Time: " << this->tick << std::endl;
-        std::cout << log_string << "Markets Situation" << std::endl
-                  << "----------------------------------" << std::endl;
+        std::cout << log_string << "Time: " << this->tick << std::endl << "----------------------------------" << std::endl;
 
-        for (market::Market market : this->markets)
-        {
+
             std::cout << market.name << std::endl;
             for (instruments::Stock *instrument : this->instruments)
             {
                 (*instrument).show();
                 if (market.buy_orders.count(instrument))
                 {
-                    std::cout << "\tTop buy order: " << std::endl
-                              << "\t================" << std::endl;
-                    std::cout << "\t\tPrice:" << market.buy_orders.at(instrument).top()->quantity << std::endl;
+                    std::cout << log_string << "\tTop buy order: " << std::endl
+                              << log_string << "\t================" << std::endl;
+                    std::cout << log_string << "\t\tPrice:" << market.buy_orders.at(instrument).top()->quantity << std::endl;
                 }
                 std::cout << std::endl;
                 if (market.sell_orders.count(instrument))
                 {
-                    std::cout << "\tTop sell order: " << std::endl
-                              << "\t================" << std::endl;
-                    std::cout << "\t\tPrice:" << market.sell_orders.at(instrument).top()->quantity << std::endl;
+                    std::cout << log_string << "\tTop sell order: " << std::endl
+                              << log_string <<"\t================" << std::endl;
+                    std::cout << log_string << "\t\tPrice:" << market.sell_orders.at(instrument).top()->quantity << std::endl;
                 }
             }
-        }
         std::cout << "----------------------------------" << std::endl;
     }
 
     void Simulation::simulate_tick()
     {
-        // TODO: implement all the logic that happens in a given tick in time
+        // Emitters that emit news
+        for (information::Emitter emitter : this->emitters){
+            emitter.emit(this->news_stream, this->tick, &this->companies.at(rand() % this->companies.size()), &this->sectors.at(rand() % this->sectors.size()));
+        }
+
+        // Actors trade
+        for (actors::Actor actor : this->actors){
+            actor.act(this->news_stream, this->companies, this->market);
+        }
         this->tick++;
     }
 

@@ -16,7 +16,7 @@ namespace instruments
     class Instrument
     {
     public:
-        virtual void show(int indent=0) = 0;
+        virtual void show(int indent = 0) = 0;
         virtual ~Instrument() = default;
     };
 
@@ -25,6 +25,18 @@ namespace instruments
         std::string name;
         double valuation;
         Sector(std::string);
+        bool operator=(const Sector &other) const
+        {
+            return this->name == other.name;
+        }
+        bool operator<(const Sector &other) const
+        {
+            return this->name < other.name;
+        }
+        bool operator>(const Sector &other) const
+        {
+            return this->name > other.name;
+        }
     };
 
     // Stocks and companies
@@ -36,9 +48,18 @@ namespace instruments
         const Company &company;
         Stock(std::string, const Company &);
         double get_current_price(const market::Market &);
-        void show(int indent=0);
-        bool operator<(const Stock &other)  const {
+        void show(int indent = 0);
+        bool operator=(const Stock &other) const
+        {
+            return this->ticker == other.ticker;
+        }
+        bool operator<(const Stock &other) const
+        {
             return this->ticker < other.ticker;
+        }
+        bool operator>(const Stock &other) const
+        {
+            return this->ticker > other.ticker;
         }
     };
 
@@ -61,6 +82,18 @@ namespace instruments
 
         Company(int id, long int, long int, long int, Sector &);
         int market_cap(const market::Market &);
+        bool operator=(const Company &other) const
+        {
+            return this->id == other.id;
+        }
+        bool operator<(const Company &other) const
+        {
+            return this->id < other.id;
+        }
+        bool operator>(const Company &other) const
+        {
+            return this->id > other.id;
+        }
     };
 
 };

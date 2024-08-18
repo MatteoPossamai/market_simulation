@@ -31,7 +31,7 @@ namespace market
         instruments::Stock &instrument;
         int quantity;
         int time;
-        int price;
+        double price;
         bool active;
 
         Order(int, actors::Actor &, OrderType, instruments::Stock &, int, int);
@@ -60,6 +60,7 @@ namespace market
         std::map<instruments::Stock *, std::priority_queue<std::shared_ptr<Order>>> buy_orders;
         std::map<instruments::Stock *, std::priority_queue<std::shared_ptr<Order>, std::vector<std::shared_ptr<Order>>, std::greater<std::shared_ptr<Order>>>> sell_orders;
 
+        Market() = default;
         Market(std::string);
         int add_buy_order(actors::Actor &, OrderType, instruments::Stock &, int, int);
         int add_sell_order(actors::Actor &, OrderType, instruments::Stock &, int, int);

@@ -40,6 +40,10 @@ namespace information
     struct NewsStream
     {
         std::vector<News> news;
+        std::map<instruments::Company, std::vector<std::pair<int, double>>> company_sentiment;
+        std::map<instruments::Sector, std::vector<std::pair<int, double>>> sector_sentiment;
+        void add_news(CompanyNews, int time);
+        void add_news(SectorNews, int time);
     };
 
     // Emitter definition
@@ -58,7 +62,7 @@ namespace information
         EmitterType type;
 
         Emitter(std::string, double, EmitterType);
-        void emit(NewsStream &stream);
+        void emit(NewsStream &stream, int time, instruments::Company* company, instruments::Sector* sector);
     };
 
 }

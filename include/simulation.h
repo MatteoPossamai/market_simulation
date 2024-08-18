@@ -16,7 +16,7 @@ namespace simulation {
             information::NewsStream news_stream;
             std::vector<instruments::Sector> sectors;
             std::vector<information::Emitter> emitters;
-            std::vector<market::Market> markets;
+            market::Market market;
             std::vector<actors::Actor> actors;
             std::vector<instruments::Stock*> instruments;
             std::vector<instruments::Company> companies;
