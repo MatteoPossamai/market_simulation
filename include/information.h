@@ -13,7 +13,7 @@ namespace information
         long long int time;
 
     public:
-         double sentiment;
+        double sentiment;
         Emitter &emitter;
 
         News(double, Emitter &emitter, int time);
@@ -23,24 +23,24 @@ namespace information
     class SectorNews : public News
     {
     public:
-        instruments::Sector* sector;
+        instruments::Sector *sector;
 
-        SectorNews(double, Emitter &, int, instruments::Sector*);
+        SectorNews(double, Emitter &, int, instruments::Sector *);
     };
 
     class CompanyNews : public News
     {
     public:
-        instruments::Company* company;
+        std::shared_ptr<instruments::Company> company;
 
-        CompanyNews(double, Emitter &emitter, int time, instruments::Company*);
+        CompanyNews(double, Emitter &emitter, int time, std::shared_ptr<instruments::Company> );
     };
 
     // News stream
     struct NewsStream
     {
         std::vector<News> news;
-        std::map<instruments::Company, std::vector<std::pair<int, double>>> company_sentiment;
+        std::map<std::shared_ptr<instruments::Company>, std::vector<std::pair<int, double>>> company_sentiment;
         std::map<instruments::Sector, std::vector<std::pair<int, double>>> sector_sentiment;
         void add_news(CompanyNews, int time);
         void add_news(SectorNews, int time);
@@ -62,7 +62,7 @@ namespace information
         EmitterType type;
 
         Emitter(std::string, double, EmitterType);
-        void emit(NewsStream &stream, int time, instruments::Company* company, instruments::Sector* sector);
+        void emit(NewsStream &stream, int time, std::shared_ptr<instruments::Company> company, instruments::Sector *sector);
     };
 
 }

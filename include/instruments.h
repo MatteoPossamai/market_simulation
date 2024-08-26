@@ -46,9 +46,9 @@ namespace instruments
     public:
         std::shared_ptr<Stock> self;
         std::string ticker;
-        const Company &company;
-        Stock(std::string, const Company &);
-        double get_current_price(const market::Market &);
+        std::shared_ptr<Company> company;
+        Stock() = default;
+        double get_current_price(const market::Market &, long int, long int, long int) const;
         void show(std::string);
         bool operator=(const Stock &other) const
         {
@@ -73,16 +73,17 @@ namespace instruments
     class Company
     {
     public:
+        std::shared_ptr<Company> self;
         std::string name;
         int id;
-        Stock stock;
+        std::shared_ptr<Stock> stock;
         long int n_stocks;
         long int n_owned_stocks;
         long int debt;
         Sector &sector;
 
         Company(int id, long int, long int, long int, Sector &);
-        int market_cap(const market::Market &);
+        int market_cap(const market::Market &) const;
         bool operator=(const Company &other) const
         {
             return this->id == other.id;

@@ -26,7 +26,7 @@ namespace actors
         std::vector<int> active_orders;
         void buy(market::Market &, std::shared_ptr<instruments::Stock>, market::OrderType, int, double price);
         void sell(market::Market &, std::shared_ptr<instruments::Stock>, market::OrderType, int, double price);
-        double inspect(const instruments::Company &, const information::NewsStream &);
+        double inspect(const std::shared_ptr<instruments::Company>, const information::NewsStream &);
         double cash;
         double inspect(const instruments::Sector &, const information::NewsStream &);
 
@@ -51,7 +51,7 @@ namespace actors
 
         portfolio_t portfolio;
         Actor(int, double, int, double);
-        void act(const information::NewsStream &, std::vector<instruments::Company> &, market::Market &);
+        void act(const information::NewsStream &, std::vector<std::shared_ptr<instruments::Company>>, market::Market &);
     };
 
 }

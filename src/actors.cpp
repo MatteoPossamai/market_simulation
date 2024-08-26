@@ -54,20 +54,20 @@ namespace actors
     }
   }
 
-  void Actor::act(const information::NewsStream &news_stream, std::vector<instruments::Company> &companies, market::Market &market)
+  void Actor::act(const information::NewsStream &news_stream, std::vector<std::shared_ptr<instruments::Company>> companies, market::Market &market)
   {
     // Portfolio management
 
     auto portfolio_iter = this->portfolio.begin();
     while (portfolio_iter != this->portfolio.end())
     {
-      const instruments::Company &company = portfolio_iter->first->company;
+      const std::shared_ptr<instruments::Company> company = portfolio_iter->first->company;
       double sentiment = inspect(portfolio_iter->first->company, news_stream);
 
       double value = this->risk_adversity * sentiment;
 
       auto stock = portfolio_iter->first;
-      double price = stock->get_current_price(market);
+      double price = stock->get_current_price(market, 0, 0, 0);
       if (value < 15)
       {
         sell(market, stock, market::MARKET_ORDER, portfolio_iter->second);
@@ -97,25 +97,30 @@ namespace actors
     int checks = this->execution_pace;
     for (int i = 0; i < checks; i++)
     {
-      instruments::Company random_company = companies.at(rand() % companies.size());
+      auto random_company = companies.at(rand() % companies.size());
       double sentiment = inspect(random_company, news_stream);
-      int current_price = random_company.stock.get_current_price(market);
+      auto cmp = random_company.get();
+      int stock, owned, debt;
+      stock = cmp->n_stocks;
+      owned = cmp->n_owned_stocks;
+      debt = cmp->debt;
+      int current_price = random_company.get()->stock.get()->get_current_price(market, stock, owned, debt); 
       double available = this->cash / this->risk_adversity;
       int quantity = std::max(0, (int)available / current_price);
       double value = this->risk_adversity * sentiment;
 
       if (value > 40 && value < 70 && quantity != 0)
       {
-        buy(market, random_company.stock.self, market::LIMIT_ORDER, quantity, current_price - (current_price * value / 1000));
+        buy(market, random_company.get()->stock.get()->self, market::LIMIT_ORDER, quantity, current_price - (current_price * value / 1000));
       }
       else if (value > 70 && quantity != 0)
       {
-        buy(market, random_company.stock.self, market::MARKET_ORDER, quantity, 0);
+        buy(market, random_company.get()->stock.get()->self, market::MARKET_ORDER, quantity, 0);
       }
     }
   }
 
-  double Actor::inspect(const instruments::Company &company, const information::NewsStream &news_stream)
+  double Actor::inspect(const std::shared_ptr<instruments::Company> company, const information::NewsStream &news_stream)
   {
     int news_available = this->execution_pace;
     int idx = news_stream.company_sentiment.count(company) ? news_stream.company_sentiment.at(company).size() - 1 : -1;
@@ -130,7 +135,7 @@ namespace actors
       idx--;
     }
     double company_sentiment;
-    double sector_sentiment = this->inspect(company.sector, news_stream);
+    double sector_sentiment = this->inspect(company.get()->sector, news_stream);
     if (times == 0)
     {
       company_sentiment = 0.5;

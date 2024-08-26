@@ -19,7 +19,7 @@ namespace simulation {
             market::Market market;
             std::vector<actors::Actor> actors;
             std::vector<std::shared_ptr<instruments::Stock>> instruments;
-            std::vector<instruments::Company> companies;
+            std::vector<std::shared_ptr<instruments::Company>> companies;
 
         public:
             int tick;

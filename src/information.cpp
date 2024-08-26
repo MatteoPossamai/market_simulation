@@ -14,7 +14,7 @@ namespace information
         : News(sentiment_value, emitter, time_value),
           sector(sector_value) {}
 
-    CompanyNews::CompanyNews(double sentiment_value, Emitter &emitter, int time_value, instruments::Company* company_value)
+    CompanyNews::CompanyNews(double sentiment_value, Emitter &emitter, int time_value, std::shared_ptr<instruments::Company> company_value)
         : News(sentiment_value, emitter, time_value),
           company(company_value) {}
 
@@ -23,7 +23,7 @@ namespace information
           trustability(trustability_value),
           type(type_value) {}
 
-    void Emitter::emit(NewsStream & stream, int time, instruments::Company* company, instruments::Sector* sector){
+    void Emitter::emit(NewsStream & stream, int time, std::shared_ptr<instruments::Company> company, instruments::Sector* sector){
         int frequency = this->type == EmitterType::INFLUENCER ? 3 : this->type == EmitterType::MEDIA_GROUP ? 7 : 15;
         int publish = rand() % frequency;
 
@@ -40,10 +40,10 @@ namespace information
 
     void NewsStream::add_news(CompanyNews news, int time){
       this->news.push_back(news);
-      if (!this->company_sentiment.count(*news.company)){
-        this->company_sentiment[*news.company] = {};
+      if (!this->company_sentiment.count(news.company)){
+        this->company_sentiment[news.company] = {};
       }
-      this->company_sentiment.at(*news.company).push_back({time, news.sentiment});
+      this->company_sentiment.at(news.company).push_back({time, news.sentiment});
     }
 
     void NewsStream::add_news(SectorNews news, int time){

@@ -34,7 +34,7 @@ namespace market
         double price;
         bool active;
 
-        Order(int, actors::Actor &, OrderType, std::shared_ptr<instruments::Stock>, int, int);
+        Order(int, actors::Actor &, OrderType, std::shared_ptr<instruments::Stock>, int, double);
         bool operator=(const Order &other) const
         {
             return this->price == other.price;
@@ -62,8 +62,8 @@ namespace market
 
         Market() = default;
         Market(std::string);
-        int add_buy_order(actors::Actor &, OrderType, std::shared_ptr<instruments::Stock>, int, int);
-        int add_sell_order(actors::Actor &, OrderType, std::shared_ptr<instruments::Stock>, int, int);
+        int add_buy_order(actors::Actor &, OrderType, std::shared_ptr<instruments::Stock>, int, double);
+        int add_sell_order(actors::Actor &, OrderType, std::shared_ptr<instruments::Stock>, int, double);
         std::shared_ptr<Order> get_order(int);
     };
 }
